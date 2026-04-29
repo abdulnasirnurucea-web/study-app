@@ -3,27 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StudyPro AI - Ultimate</title>
+    <title>StudyPro AI v3</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <link rel="manifest" href="manifest.json">
     <style>
         :root { --bg: #09090b; --card: #18181b; --primary: #8b5cf6; --text: #fafafa; --border: #27272a; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, sans-serif; margin: 0; padding: 20px 20px 100px 20px; }
-        .container { display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; }
-        .header { font-size: 28px; font-weight: 800; color: var(--primary); }
-        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; }
-        .upload-zone { border: 2px dashed #3f3f46; border-radius: 15px; padding: 40px 10px; text-align: center; background: rgba(255,255,255,0.02); cursor: pointer; }
-        #pdf-input { display: none; }
-        .btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; }
-        .loader { display: none; text-align: center; color: var(--primary); font-weight: bold; }
-        #output-area { white-space: pre-wrap; font-size: 15px; color: #d4d4d8; line-height: 1.6; }
-        .highlight { color: var(--primary); font-weight: 800; }
         
-        /* Flashcard Design */
-        .flash-box { background: #2e1065; padding: 40px 20px; border-radius: 15px; text-align: center; min-height: 180px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--primary); font-weight: bold; font-size: 18px; margin-top: 10px; }
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: -apple-system, system-ui, sans-serif; 
+            margin: 0; padding: 20px 20px 100px 20px;
+        }
 
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.98); display: flex; padding: 15px 0; border-top: 1px solid var(--border); justify-content: space-around; z-index: 1000; }
+        .container { display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; }
+        .header { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+
+        /* Alignment Fix: Cards use auto-height to prevent overlapping */
+        .card { 
+            background: var(--card); border-radius: 20px; padding: 20px; 
+            border: 1px solid var(--border); display: flex; flex-direction: column; 
+            gap: 15px; height: auto; overflow: hidden;
+        }
+
+        .upload-zone { 
+            border: 2px dashed #3f3f46; border-radius: 15px; padding: 40px 10px; 
+            text-align: center; background: rgba(255,255,255,0.02); cursor: pointer;
+        }
+
+        #pdf-input { display: none; }
+        .btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; }
+        .loader { display: none; text-align: center; color: var(--primary); font-weight: bold; padding: 10px; }
+        
+        /* Content Areas */
+        #output-area { white-space: pre-wrap; font-size: 15px; color: #d4d4d8; line-height: 1.6; }
+        .highlight { color: var(--primary); font-weight: 800; font-size: 18px; display: block; margin-bottom: 5px; }
+
+        /* Flashcard Styling */
+        .flash-card { 
+            background: #2e1065; padding: 40px 20px; border-radius: 15px; 
+            text-align: center; min-height: 200px; display: flex; 
+            align-items: center; justify-content: center; cursor: pointer; 
+            border: 2px solid var(--primary); font-weight: bold; font-size: 18px;
+        }
+
+        /* Nav Bar - Always at Bottom */
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.98); backdrop-filter: blur(10px); display: flex; padding: 15px 0; border-top: 1px solid var(--border); justify-content: space-around; z-index: 1000; }
         .nav-btn { background: none; border: none; color: #71717a; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
         .nav-btn.active { color: var(--primary); }
         input[type="password"] { width: 100%; padding: 14px; background: #000; border: 1px solid #333; color: #fff; border-radius: 10px; }
@@ -32,14 +57,15 @@
 <body>
 
     <div class="container">
-        <div id="main-view">
-            <div class="header" id="view-title">AI Study Pro</div>
+        <div id="app-view">
+            <div class="header" id="title-text">AI Notes</div>
             <div class="card">
                 <label class="upload-zone">
                     <input type="file" id="pdf-input" accept="application/pdf">
-                    <span id="file-name">📚 Tap to Select PDF</span>
+                    <span style="font-size: 40px;">📚</span><br>
+                    <span id="file-name" style="font-weight: 600;">Tap to Select PDF</span>
                 </label>
-                <div class="loader" id="loader">🧠 AI is processing...</div>
+                <div class="loader" id="loader">🧠 Gemini 3 is thinking...</div>
             </div>
             <div class="card" id="result-card" style="display:none;"><div id="output-area"></div></div>
         </div>
@@ -48,98 +74,98 @@
             <div class="header">System</div>
             <div class="card">
                 <label>Gemini API Key</label>
-                <input type="password" id="api-key" placeholder="Paste Key Here...">
+                <input type="password" id="api-key" placeholder="Paste your Key...">
                 <button class="btn" onclick="saveKey()">Save & Activate</button>
             </div>
         </div>
     </div>
 
     <nav class="nav">
-        <button class="nav-btn active" onclick="changeTab('notes', this)"><span>📝</span><span>Notes</span></button>
-        <button class="nav-btn" onclick="changeTab('quiz', this)"><span>✍️</span><span>Quiz</span></button>
-        <button class="nav-btn" onclick="changeTab('flash', this)"><span>🃏</span><span>Cards</span></button>
-        <button class="nav-btn" onclick="changeTab('settings', this)"><span>⚙️</span><span>Settings</span></button>
+        <button class="nav-btn active" onclick="switchTab('notes', this)"><span>📝</span><span>Notes</span></button>
+        <button class="nav-btn" onclick="switchTab('quiz', this)"><span>✍️</span><span>Quiz</span></button>
+        <button class="nav-btn" onclick="switchTab('flash', this)"><span>🃏</span><span>Cards</span></button>
+        <button class="nav-btn" onclick="switchTab('settings', this)"><span>⚙️</span><span>Settings</span></button>
     </nav>
 
     <script>
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
-        let pdfText = "";
+        let pdfData = "";
 
-        function changeTab(tab, btn) {
+        function switchTab(mode, btn) {
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
-            const isSettings = tab === 'settings';
-            document.getElementById('main-view').style.display = isSettings ? 'none' : 'block';
-            document.getElementById('settings-view').style.display = isSettings ? 'block' : 'none';
-            
-            if(!isSettings) document.getElementById('view-title').innerText = "AI " + tab.charAt(0).toUpperCase() + tab.slice(1);
-            if(pdfText && !isSettings) callAI(tab);
+            const set = mode === 'settings';
+            document.getElementById('app-view').style.display = set ? 'none' : 'block';
+            document.getElementById('settings-view').style.display = set ? 'block' : 'none';
+            if(!set) document.getElementById('title-text').innerText = "AI " + mode.charAt(0).toUpperCase() + mode.slice(1);
+            if(pdfData && !set) runAI(mode);
         }
 
         function saveKey() {
-            localStorage.setItem('gemini_key', document.getElementById('api-key').value.trim());
-            alert("Key Saved!");
+            localStorage.setItem('gemini_key_v3', document.getElementById('api-key').value.trim());
+            alert("Settings Updated!");
         }
-        document.getElementById('api-key').value = localStorage.getItem('gemini_key') || "";
+        document.getElementById('api-key').value = localStorage.getItem('gemini_key_v3') || "";
 
         document.getElementById('pdf-input').addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            const key = localStorage.getItem('gemini_key');
-            if(!key) return alert("Go to Settings first!");
+            const key = localStorage.getItem('gemini_key_v3');
+            if(!key) return alert("Please enter API Key in Settings!");
             
             document.getElementById('loader').style.display = 'block';
             const reader = new FileReader();
             reader.onload = async function() {
                 const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
-                pdfText = "";
+                pdfData = "";
                 for(let i=1; i <= Math.min(pdf.numPages, 3); i++) {
                     const page = await pdf.getPage(i);
                     const content = await page.getTextContent();
-                    pdfText += content.items.map(s => s.str).join(" ");
+                    pdfData += content.items.map(s => s.str).join(" ");
                 }
                 document.getElementById('file-name').innerText = file.name;
-                callAI('notes');
+                runAI('notes');
             };
             reader.readAsArrayBuffer(file);
         });
 
-        async function callAI(mode) {
-            const key = localStorage.getItem('gemini_key');
-            document.getElementById('loader').style.display = 'block';
-            document.getElementById('result-card').style.display = 'none';
+        async function runAI(mode) {
+            const key = localStorage.getItem('gemini_key_v3');
+            const loader = document.getElementById('loader');
+            const result = document.getElementById('result-card');
+            const output = document.getElementById('output-area');
 
-            let prompt = `Summarize this text: ${pdfText}`;
-            if(mode === 'quiz') prompt = `Create 3 MCQs with answers for: ${pdfText}`;
-            if(mode === 'flash') prompt = `Give me one major question and its answer from this text. Format it as 'Question: [question] Answer: [answer]': ${pdfText}`;
+            loader.style.display = 'block';
+            result.style.display = 'none';
+
+            let prompt = `Summarize these notes into bullet points: ${pdfData}`;
+            if(mode === 'quiz') prompt = `Based on this text, create 3 multiple choice questions with answers: ${pdfData}`;
+            if(mode === 'flash') prompt = `Extract one core question and answer from this text. Format as Question: [q] Answer: [a]. Text: ${pdfData}`;
 
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-3-flash:generateContent?key=${key}; {
+                // FIXED URL FOR 2026: Gemini 3 Flash on Stable v1 endpoint
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-3-flash:generateContent?key=${key}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
                 const data = await res.json();
                 if(data.error) throw new Error(data.error.message);
-                const aiResponse = data.candidates[0].content.parts[0].text;
+                const text = data.candidates[0].content.parts[0].text;
                 
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('result-card').style.display = 'block';
-                
+                loader.style.display = 'none';
+                result.style.display = 'block';
+
                 if(mode === 'flash') {
-                    const parts = aiResponse.split('Answer:');
-                    const q = parts[0].replace('Question:', '').trim();
-                    const a = parts[1] ? parts[1].trim() : "Tap to see answer";
-                    document.getElementById('output-area').innerHTML = `
-                        <div class="flash-box" id="fcard" onclick="this.innerText === '${q}' ? this.innerText='${a}' : this.innerText='${q}'">${q}</div>
-                        <p style="text-align:center; font-size:12px; margin-top:10px;">Tap the card to flip</p>
-                    `;
+                    const split = text.split('Answer:');
+                    const q = split[0].replace('Question:', '').trim();
+                    const a = split[1] ? split[1].trim() : "Tap to flip";
+                    output.innerHTML = `<div class="flash-card" onclick="this.innerText === '${q}' ? this.innerText='${a}' : this.innerText='${q}'">${q}</div>`;
                 } else {
-                    document.getElementById('output-area').innerHTML = `<span class="highlight">${mode.toUpperCase()}</span><br>${aiResponse.replace(/\n/g, '<br>')}`;
+                    output.innerHTML = `<span class="highlight">${mode.toUpperCase()}</span><br>${text.replace(/\n/g, '<br>')}`;
                 }
             } catch (err) {
-                alert("Error: " + err.message);
-                document.getElementById('loader').style.display = 'none';
+                alert("Connection Error: " + err.message);
+                loader.style.display = 'none';
             }
         }
     </script>
