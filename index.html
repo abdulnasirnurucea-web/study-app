@@ -8,27 +8,94 @@
     <link rel="manifest" href="manifest.json">
     <style>
         :root { --bg: #09090b; --card: #18181b; --primary: #8b5cf6; --text: #fafafa; }
-        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; padding: 20px; padding-bottom: 80px; }
-        .header { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: var(--primary); }
-        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #27272a; margin-bottom: 20px; }
         
-        /* Upload Area */
-        .upload-zone { border: 2px dashed #3f3f46; border-radius: 12px; padding: 30px; text-align: center; background: rgba(255,255,255,0.02); }
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: -apple-system, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            padding-bottom: 100px; 
+            box-sizing: border-box;
+        }
+
+        .header { 
+            font-size: 26px; 
+            font-weight: 800; 
+            margin-bottom: 20px; 
+            color: var(--primary); 
+        }
+
+        /* Fixed Alignment Card */
+        .card { 
+            background: var(--card); 
+            border-radius: 20px; 
+            padding: 24px; 
+            border: 1px solid #27272a; 
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column; /* Forces vertical stacking */
+            gap: 20px; /* Creates perfect space between text and box */
+            align-items: stretch;
+        }
+
+        #instruction {
+            margin: 0;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #d4d4d8;
+        }
+        
+        /* Fixed Upload Zone */
+        .upload-zone { 
+            border: 2px dashed #3f3f46; 
+            border-radius: 15px; 
+            padding: 35px 15px; 
+            text-align: center; 
+            background: rgba(255,255,255,0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
         #pdf-input { display: none; }
         
-        /* Loading Animation */
-        .loader { display: none; margin: 20px 0; color: var(--primary); font-weight: bold; }
-        .loader span { animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+        .loader { 
+            display: none; 
+            text-align: center;
+            color: var(--primary); 
+            font-weight: bold; 
+            margin-top: 10px;
+        }
 
-        /* Output Styling */
         #output { line-height: 1.6; color: #d4d4d8; white-space: pre-wrap; }
-        .highlight { color: var(--primary); font-weight: bold; }
+        .highlight { color: var(--primary); font-weight: bold; margin-bottom: 8px; display: block; }
 
-        /* Navbar */
-        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: #121212; display: flex; padding: 15px; border-top: 1px solid #27272a; justify-content: space-around; }
-        .nav-btn { background: none; border: none; color: #71717a; font-size: 12px; }
+        /* Navigation */
+        .nav { 
+            position: fixed; 
+            bottom: 0; left: 0; right: 0; 
+            background: rgba(18, 18, 18, 0.95); 
+            backdrop-filter: blur(10px);
+            display: flex; 
+            padding: 15px 0; 
+            border-top: 1px solid #27272a; 
+            justify-content: space-around;
+        }
+        .nav-btn { 
+            background: none; 
+            border: none; 
+            color: #71717a; 
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
         .nav-btn.active { color: var(--primary); }
+        .nav-icon { font-size: 20px; }
     </style>
 </head>
 <body>
@@ -36,16 +103,15 @@
     <div class="header">AI Study Notes</div>
 
     <div class="card">
-        <div id="status-area">
-            <p id="instruction">Upload a PDF to generate AI notes.</p>
-        </div>
+        <p id="instruction">Upload a PDF to generate AI notes. Your summaries will appear below.</p>
 
-        <label class="upload-zone" id="drop-area">
+        <label class="upload-zone">
             <input type="file" id="pdf-input" accept="application/pdf">
-            <span id="file-name">📂 Tap to select PDF</span>
+            <span style="font-size: 30px; margin-bottom: 10px;">📂</span>
+            <span id="file-name" style="font-weight: 600;">Tap to select PDF</span>
         </label>
 
-        <div class="loader" id="loader">🧠 AI is analyzing <span>...</span></div>
+        <div class="loader" id="loader">🧠 AI is analyzing...</div>
     </div>
 
     <div class="card" id="result-card" style="display:none;">
@@ -53,9 +119,18 @@
     </div>
 
     <nav class="nav">
-        <button class="nav-btn active">📝 Notes</button>
-        <button class="nav-btn">✍️ Quiz</button>
-        <button class="nav-btn">⚙️ Settings</button>
+        <button class="nav-btn active">
+            <span class="nav-icon">📝</span>
+            <span>Notes</span>
+        </button>
+        <button class="nav-btn">
+            <span class="nav-icon">✍️</span>
+            <span>Quiz</span>
+        </button>
+        <button class="nav-btn">
+            <span class="nav-icon">⚙️</span>
+            <span>Settings</span>
+        </button>
     </nav>
 
     <script>
@@ -71,49 +146,52 @@
             const file = e.target.files[0];
             if (!file) return;
 
-            // 1. UI Updates
             fileNameLabel.innerText = file.name;
             loader.style.display = 'block';
             resultCard.style.display = 'none';
 
-            // 2. Read the PDF
             const reader = new FileReader();
             reader.onload = async function() {
-                const typedarray = new Uint8Array(this.result);
-                const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                
-                let fullText = "";
-                // Loop through first 3 pages (to save memory on mobile)
-                for(let i=1; i <= Math.min(pdf.numPages, 3); i++) {
-                    const page = await pdf.getPage(i);
-                    const content = await page.getTextContent();
-                    fullText += content.items.map(s => s.str).join(" ");
-                }
+                try {
+                    const typedarray = new Uint8Array(this.result);
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    
+                    let extractedText = "";
+                    const maxPages = Math.min(pdf.numPages, 3);
+                    
+                    for(let i=1; i <= maxPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        extractedText += content.items.map(s => s.str).join(" ");
+                    }
 
-                processWithAI(fullText);
+                    showMockAI(extractedText);
+                } catch (err) {
+                    alert("Error reading PDF. Try a smaller file.");
+                    loader.style.display = 'none';
+                }
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function processWithAI(text) {
-            // This simulates an AI summary logic
+        function showMockAI(text) {
             setTimeout(() => {
                 loader.style.display = 'none';
                 resultCard.style.display = 'block';
                 
-                const summary = text.substring(0, 300) + "..."; // Grabs first 300 chars
+                const preview = text.length > 10 ? text.substring(0, 250) + "..." : "No text found in PDF.";
                 
                 output.innerHTML = `
-                    <div class="highlight">AI SUMMARY:</div>
-                    <p>${summary}</p>
-                    <div class="highlight">KEY CONCEPTS:</div>
-                    <ul>
-                        <li>Topic identified from document</li>
-                        <li>Automated study point 1</li>
-                        <li>Automated study point 2</li>
+                    <span class="highlight">✨ AI SUMMARY</span>
+                    <p>${preview}</p>
+                    <span class="highlight">💡 KEY TAKEAWAYS</span>
+                    <ul style="padding-left: 20px; margin-top: 5px;">
+                        <li>Primary topic identified from content.</li>
+                        <li>Key terminology extracted.</li>
+                        <li>Ready for quiz generation.</li>
                     </ul>
                 `;
-            }, 2000);
+            }, 1500);
         }
     </script>
 </body>
