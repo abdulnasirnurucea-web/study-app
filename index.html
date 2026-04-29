@@ -3,195 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>StudyPro AI</title>
+    <title>StudyPro AI - Ultimate</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
     <link rel="manifest" href="manifest.json">
     <style>
-        :root { --bg: #09090b; --card: #18181b; --primary: #8b5cf6; --text: #fafafa; }
+        :root { --bg: #09090b; --card: #18181b; --primary: #8b5cf6; --text: #fafafa; --border: #27272a; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, system-ui, sans-serif; margin: 0; padding: 20px 20px 100px 20px; line-height: 1.5; }
         
-        body { 
-            background: var(--bg); 
-            color: var(--text); 
-            font-family: -apple-system, sans-serif; 
-            margin: 0; 
-            padding: 20px; 
-            padding-bottom: 100px; 
-            box-sizing: border-box;
-        }
-
-        .header { 
-            font-size: 26px; 
-            font-weight: 800; 
-            margin-bottom: 20px; 
-            color: var(--primary); 
-        }
-
-        /* Fixed Alignment Card */
-        .card { 
-            background: var(--card); 
-            border-radius: 20px; 
-            padding: 24px; 
-            border: 1px solid #27272a; 
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column; /* Forces vertical stacking */
-            gap: 20px; /* Creates perfect space between text and box */
-            align-items: stretch;
-        }
-
-        #instruction {
-            margin: 0;
-            font-size: 16px;
-            line-height: 1.5;
-            color: #d4d4d8;
-        }
+        /* Layout Fixes */
+        .container { display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; }
+        .header { font-size: 28px; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+        .card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 15px; }
         
-        /* Fixed Upload Zone */
-        .upload-zone { 
-            border: 2px dashed #3f3f46; 
-            border-radius: 15px; 
-            padding: 35px 15px; 
-            text-align: center; 
-            background: rgba(255,255,255,0.03);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
+        /* UI Elements */
+        .upload-zone { border: 2px dashed #3f3f46; border-radius: 15px; padding: 40px 10px; text-align: center; background: rgba(255,255,255,0.02); cursor: pointer; transition: 0.3s; }
         #pdf-input { display: none; }
-        
-        .loader { 
-            display: none; 
-            text-align: center;
-            color: var(--primary); 
-            font-weight: bold; 
-            margin-top: 10px;
-        }
+        .btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; width: 100%; cursor: pointer; }
+        .loader { display: none; text-align: center; color: var(--primary); font-weight: bold; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
-        #output { line-height: 1.6; color: #d4d4d8; white-space: pre-wrap; }
-        .highlight { color: var(--primary); font-weight: bold; margin-bottom: 8px; display: block; }
+        /* Content Areas */
+        #output-area { white-space: pre-wrap; font-size: 15px; color: #d4d4d8; }
+        .highlight { color: var(--primary); font-weight: 800; font-size: 18px; display: block; margin-bottom: 10px; }
+        
+        /* Flashcard Styling */
+        .flashcard { background: #2e1065; padding: 30px; border-radius: 15px; text-align: center; min-height: 150px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--primary); }
 
         /* Navigation */
-        .nav { 
-            position: fixed; 
-            bottom: 0; left: 0; right: 0; 
-            background: rgba(18, 18, 18, 0.95); 
-            backdrop-filter: blur(10px);
-            display: flex; 
-            padding: 15px 0; 
-            border-top: 1px solid #27272a; 
-            justify-content: space-around;
-        }
-        .nav-btn { 
-            background: none; 
-            border: none; 
-            color: #71717a; 
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
+        .nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10,10,10,0.95); backdrop-filter: blur(10px); display: flex; padding: 15px 0; border-top: 1px solid var(--border); justify-content: space-around; z-index: 1000; }
+        .nav-btn { background: none; border: none; color: #71717a; font-size: 11px; display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
         .nav-btn.active { color: var(--primary); }
         .nav-icon { font-size: 20px; }
+
+        input[type="password"] { width: 100%; padding: 14px; background: #000; border: 1px solid #333; color: #fff; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="header">AI Study Notes</div>
+    <div class="container">
+        <div id="notes-view">
+            <div class="header">AI Study Pro</div>
+            <div class="card">
+                <p style="margin:0; opacity: 0.8;">Upload PDF to generate Notes, Quizzes, & Flashcards.</p>
+                <label class="upload-zone" id="drop-area">
+                    <input type="file" id="pdf-input" accept="application/pdf">
+                    <span style="font-size: 40px;">📚</span><br>
+                    <span id="file-name" style="font-weight: 600;">Tap to Select PDF</span>
+                </label>
+                <div class="loader" id="loader">🧠 Gemini is Processing...</div>
+            </div>
+            <div class="card" id="result-card" style="display:none;">
+                <div id="output-area"></div>
+            </div>
+        </div>
 
-    <div class="card">
-        <p id="instruction">Upload a PDF to generate AI notes. Your summaries will appear below.</p>
-
-        <label class="upload-zone">
-            <input type="file" id="pdf-input" accept="application/pdf">
-            <span style="font-size: 30px; margin-bottom: 10px;">📂</span>
-            <span id="file-name" style="font-weight: 600;">Tap to select PDF</span>
-        </label>
-
-        <div class="loader" id="loader">🧠 AI is analyzing...</div>
-    </div>
-
-    <div class="card" id="result-card" style="display:none;">
-        <div id="output"></div>
+        <div id="settings-view" style="display:none;">
+            <div class="header">System</div>
+            <div class="card">
+                <label style="font-weight: bold;">Gemini API Key</label>
+                <input type="password" id="api-key" placeholder="Paste Key Here...">
+                <button class="btn" onclick="saveKey()">Save & Activate</button>
+                <p style="font-size:12px; color:#71717a;">Get your key free at: aistudio.google.com</p>
+            </div>
+        </div>
     </div>
 
     <nav class="nav">
-        <button class="nav-btn active">
-            <span class="nav-icon">📝</span>
-            <span>Notes</span>
-        </button>
-        <button class="nav-btn">
-            <span class="nav-icon">✍️</span>
-            <span>Quiz</span>
-        </button>
-        <button class="nav-btn">
-            <span class="nav-icon">⚙️</span>
-            <span>Settings</span>
-        </button>
+        <button class="nav-btn active" onclick="changeTab('notes', this)"><span class="nav-icon">📝</span><span>Notes</span></button>
+        <button class="nav-btn" onclick="changeTab('quiz', this)"><span class="nav-icon">✍️</span><span>Quiz</span></button>
+        <button class="nav-btn" onclick="changeTab('flash', this)"><span class="nav-icon">🃏</span><span>Cards</span></button>
+        <button class="nav-btn" onclick="changeTab('settings', this)"><span class="nav-icon">⚙️</span><span>Settings</span></button>
     </nav>
 
     <script>
-        const pdfInput = document.getElementById('pdf-input');
-        const loader = document.getElementById('loader');
-        const output = document.getElementById('output');
-        const resultCard = document.getElementById('result-card');
-        const fileNameLabel = document.getElementById('file-name');
-
+        // CORE CONFIG
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        let currentExtractedText = "";
 
-        pdfInput.addEventListener('change', async (e) => {
+        function changeTab(tab, btn) {
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            document.getElementById('notes-view').style.display = tab === 'settings' ? 'none' : 'block';
+            document.getElementById('settings-view').style.display = tab === 'settings' ? 'block' : 'none';
+
+            if(currentExtractedText && tab !== 'settings') {
+                processContent(tab);
+            }
+        }
+
+        function saveKey() {
+            localStorage.setItem('gemini_key', document.getElementById('api-key').value);
+            alert("Configuration Saved!");
+        }
+        document.getElementById('api-key').value = localStorage.getItem('gemini_key') || "";
+
+        // PDF PROCESSING
+        document.getElementById('pdf-input').addEventListener('change', async (e) => {
             const file = e.target.files[0];
-            if (!file) return;
+            const key = localStorage.getItem('gemini_key');
+            if(!key) return alert("Add your API Key in Settings first!");
 
-            fileNameLabel.innerText = file.name;
-            loader.style.display = 'block';
-            resultCard.style.display = 'none';
+            document.getElementById('file-name').innerText = file.name;
+            document.getElementById('loader').style.display = 'block';
 
             const reader = new FileReader();
             reader.onload = async function() {
-                try {
-                    const typedarray = new Uint8Array(this.result);
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    
-                    let extractedText = "";
-                    const maxPages = Math.min(pdf.numPages, 3);
-                    
-                    for(let i=1; i <= maxPages; i++) {
-                        const page = await pdf.getPage(i);
-                        const content = await page.getTextContent();
-                        extractedText += content.items.map(s => s.str).join(" ");
-                    }
-
-                    showMockAI(extractedText);
-                } catch (err) {
-                    alert("Error reading PDF. Try a smaller file.");
-                    loader.style.display = 'none';
+                const typedarray = new Uint8Array(this.result);
+                const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                let text = "";
+                for(let i=1; i <= Math.min(pdf.numPages, 3); i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    text += content.items.map(s => s.str).join(" ");
                 }
+                currentExtractedText = text;
+                processContent('notes');
             };
             reader.readAsArrayBuffer(file);
         });
 
-        function showMockAI(text) {
-            setTimeout(() => {
+        // AI LOGIC
+        async function processContent(mode) {
+            const key = localStorage.getItem('gemini_key');
+            const loader = document.getElementById('loader');
+            const resultCard = document.getElementById('result-card');
+            const output = document.getElementById('output-area');
+
+            loader.style.display = 'block';
+            resultCard.style.display = 'none';
+
+            let prompt = "";
+            if(mode === 'notes') prompt = "Summarize this into clear study notes with headers: " + currentExtractedText;
+            if(mode === 'quiz') prompt = "Create 3 multiple choice questions with answers based on this: " + currentExtractedText;
+            if(mode === 'flash') prompt = "Create 3 flashcards (Front: Question, Back: Answer) for this: " + currentExtractedText;
+
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                const aiText = data.candidates[0].content.parts[0].text;
+                
                 loader.style.display = 'none';
-                resultCard.style.display = 'block';
+                resultCard.style.display = 'flex';
                 
-                const preview = text.length > 10 ? text.substring(0, 250) + "..." : "No text found in PDF.";
-                
-                output.innerHTML = `
-                    <span class="highlight">✨ AI SUMMARY</span>
-                    <p>${preview}</p>
-                    <span class="highlight">💡 KEY TAKEAWAYS</span>
-                    <ul style="padding-left: 20px; margin-top: 5px;">
-                        <li>Primary topic identified from content.</li>
-                        <li>Key terminology extracted.</li>
-                        <li>Ready for quiz generation.</li>
-                    </ul>
-                `;
-            }, 1500);
+                if(mode === 'flash') {
+                    output.innerHTML = `<span class="highlight">Flashcards</span><div class="flashcard" onclick="this.innerText === 'Tap to Reveal' ? this.innerText='AI Generated Answer' : this.innerText='Tap to Reveal'">${aiText}</div>`;
+                } else {
+                    output.innerHTML = `<span class="highlight">${mode.toUpperCase()}</span>${aiText.replace(/\n/g, '<br>')}`;
+                }
+            } catch (err) {
+                alert("AI Error. Check Connection or Key.");
+                loader.style.display = 'none';
+            }
         }
     </script>
 </body>
